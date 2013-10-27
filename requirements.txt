@@ -2,5 +2,10 @@
 dj-database-url==0.2.2
 django-extensions==1.2.5
 psycopg2==2.5.1
+python-dateutil==2.1
+pytz==2013.7
+redis==2.8.0
+rq==0.3.11
 six==1.4.1
+times==0.6.2
 uWSGI==1.9.18.2
