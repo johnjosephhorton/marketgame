@@ -34,7 +34,3 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-
-*.db
-/local_settings.py
-/mdb/static/
