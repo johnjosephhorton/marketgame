@@ -13,6 +13,9 @@ class Experiment(TimeStampedModel):
                                           through='Session',
                                           related_name='experiments')
 
+    def __unicode__(self):
+        return self.short_name
+
 
 class Participant(TimeStampedModel):
     name = models.CharField(max_length=80,
@@ -21,6 +24,9 @@ class Participant(TimeStampedModel):
     email = models.EmailField(max_length=254,
                               unique=True,
                               db_index=True)
+
+    def __unicode__(self):
+        return '{} <{}>'.format(self.name, self.email)
 
 
 class Session(TimeStampedModel):
@@ -33,27 +39,42 @@ class Session(TimeStampedModel):
     class Meta:
         unique_together = ('experiment', 'participant')
 
+    def __unicode__(self):
+        return 'Session {}'.format(self.id)
+
 
 class Event(TimeStampedModel):
     session = models.ForeignKey(Session, related_name='events')
     event_type = models.CharField(max_length=80)
     data = JSONField(default='{}')
 
+    def __unicode__(self):
+        return 'Event {}'.format(self.id)
+
 
 class Item(TimeStampedModel):
     name = models.CharField(max_length=80, unique=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __unicode__(self):
+        return self.name
 
 
 class ChoiceSet(TimeStampedModel):
     session = models.ForeignKey(Session)
     order = JSONField(default='{}')
 
+    def __unicode__(self):
+        return 'ChoiceSet {}'.format(self.id)
+
 
 class Choice(TimeStampedModel):
     choice_set = models.ForeignKey(ChoiceSet, related_name='choices')
     item = models.ForeignKey(Item)
     bid = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return 'Choice {}'.format(self.id)
 
 
 class Winner(TimeStampedModel):
@@ -64,3 +85,6 @@ class Winner(TimeStampedModel):
 
     class Meta:
         unique_together = ('experiment', 'participant', 'item')
+
+    def __unicode__(self):
+        return 'Winner {}'.format(self.id)
