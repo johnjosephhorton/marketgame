@@ -4,7 +4,7 @@ Market Game
 This Django application runs on [Heroku][1], so it's necessary to
 complete the [Getting Started][2] guide if you haven't already.
 
-The following assumes the development machine is running on OSX.
+The following assumes the development machine is running OSX.
 
 
 Dependencies
@@ -13,10 +13,10 @@ Dependencies
 ### Postgresql
 
 On OSX, you can use [HomeBrew][3] or MacPorts to install Postgres. Using HomeBrew
-is recommended, so I'm going to be using that from now on.
+is preferable, so I'm going to be using that from now on.
 
 ```bash
-# install latest version
+# install the latest version
 brew install postgresql
 
 # initial configuration
@@ -37,7 +37,7 @@ createdb marketgame
 # install redis
 brew install redis
 
-# start background redis process  using default config
+# start background redis process using default config
 redis-server /usr/local/etc/redis.conf &
 ```
 
@@ -73,20 +73,20 @@ git clone git@github.com:johnjosephhorton/marketgame.git
 # add heroku remote for pushing deployments
 git remote add git@heroku.com:marketgame.git
 
-# if marketgame virtualenv isn't already active
+# if the marketgame virtualenv isn't already active
 workon marketgame
 
-# switch to project directory
+# switch to the project directory
 cd /path/to/marketgame
 
 # install project dependencies
 pip install -r requirements.txt
 
-# export the following variables
+# export database url variable; this is used in settings.py
 export DATABASE_URL=postgres://localhost/marketgame
 
-# instead of exporting this variable manually for each session, you
-# can export the variable on virtualenv activation
+# instead of exporting this variable for every terminal session, you
+# can have it exportted automatically on virtualenv activation
 echo 'export DATABASE_URL=postgres://localhost/marketgame' >> ~/.virtualenvs/marketgame/bin/postactivate
 
 # run the following django commands
@@ -98,7 +98,7 @@ echo 'export DATABASE_URL=postgres://localhost/marketgame' >> ~/.virtualenvs/mar
 ./manage.py runserver
 
 # however, it's better to run a local server using foreman, which
-# emulate the uWSGI configuration in production
+# emulates the uWSGI configuration used in production
 foreman start
 ```
 
@@ -110,10 +110,10 @@ any arbitrary shell command, can be run using ``heroku run``. For
 example:
 
 ```bash
-# run syncdb in production
+# running syncdb in production
 heroku run python manage.py syncdb
 
-# or access the python shell
+# or accessing the python shell
 heroku run python manage.py shell
 ```
 
@@ -122,13 +122,14 @@ Starting app dyno is easy:
 ```bash
 heroku ps:scale web=1
 
-# to restart, assuming one dyno
+# to restart, assuming only one dyno
 heroku ps:restart web.1
 
 # stop the dyno
 heroku ps:stop web.1
 
-# or the following scales all web dynos to 0
+# the following scales all web dynos to 0, effectively
+# stopping/killing web dyno(s)
 heroku ps:scale web=0
 ```
 
