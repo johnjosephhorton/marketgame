@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 from django_extensions.db.models import TimeStampedModel
@@ -9,6 +10,8 @@ class Experiment(TimeStampedModel):
                                   unique=True,
                                   db_index=True)
     show_bid_counts = models.BooleanField(default=False)
+    disabled = models.BooleanField(default=False)
+    deadline = models.DateTimeField()
     participants = models.ManyToManyField('Participant',
                                           through='Session',
                                           related_name='experiments')
@@ -30,6 +33,10 @@ class Participant(TimeStampedModel):
 
 
 class Session(TimeStampedModel):
+    access_token = models.CharField(max_length="32",
+                                    unique=True,
+                                    db_index=True,
+                                    editable=False)
     experiment = models.ForeignKey(Experiment, related_name='sessions')
     participant = models.ForeignKey(Participant, related_name='sessions')
     quota = models.PositiveSmallIntegerField(default=1)
@@ -41,6 +48,11 @@ class Session(TimeStampedModel):
 
     def __unicode__(self):
         return 'Session {}'.format(self.id)
+
+    def save(*args, **kwargs):
+        if self.pk is None:
+            self.access_token = uuid.uuid1()
+        return super(Session, self).save(*args, **kwargs)
 
 
 class Event(TimeStampedModel):
