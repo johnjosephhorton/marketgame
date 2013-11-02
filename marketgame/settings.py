@@ -90,3 +90,15 @@ STATICFILES_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), 'templates'),
 )
+
+EMAIL_HOST = 'smtp.mandrillapp.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get('MANDRILL_USERNAME', '')
+EMAIL_HOST_PASSWORD = os.environ.get('MANDRILL_APIKEY', '')
+
+USE_EMAIL_CONSOLE = os.environ.get('USE_EMAIL_CONSOLE', False)
+
+if not USE_EMAIL_CONSOLE:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
