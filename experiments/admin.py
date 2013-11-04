@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.templatetags.admin_static import static
 from django.contrib import messages
+from django.contrib.auth.admin import User, UserAdmin, Group, GroupAdmin
 from django.template.response import TemplateResponse
 from django.shortcuts import redirect
 from django import forms
@@ -140,6 +141,8 @@ class WinnerAdmin(admin.ModelAdmin):
     pass
 
 
+marketadmin.register(Group, GroupAdmin)
+marketadmin.register(User, UserAdmin)
 marketadmin.register(Experiment, ExperimentAdmin)
 marketadmin.register(Participant, ParticipantAdmin)
 marketadmin.register(Session, SessionAdmin)
