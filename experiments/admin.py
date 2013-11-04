@@ -89,8 +89,31 @@ class MarketGameAdmin(AdminSite):
 marketadmin = MarketGameAdmin()
 
 
+class SessionInline(admin.TabularInline):
+    model = Session
+    extra = 1
+    fields = ('participant',
+              'quota')
+
 class ExperimentAdmin(admin.ModelAdmin):
-    pass
+    fields = ('short_name',
+              'contact_name',
+              'contact_email',
+              'show_bid_counts',
+              'deadline',
+              'items')
+    inlines = (SessionInline,)
+    list_display = ('short_name',
+                    'started',
+                    'started_time',
+                    'finished',
+                    'finished_time',
+                    'active',
+                    'deadline')
+    list_filter = ('started',
+                   'finished',
+                   'active')
+    filter_horizontal = ('items',)
 
 
 class ParticipantAdmin(admin.ModelAdmin):

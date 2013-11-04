@@ -78,7 +78,7 @@ class Item(TimeStampedModel):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __unicode__(self):
-        return self.name
+        return '{} | {}'.format(self.name, self.amount)
 
 
 class ChoiceSet(TimeStampedModel):
