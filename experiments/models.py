@@ -28,6 +28,9 @@ class Experiment(TimeStampedModel):
     def __unicode__(self):
         return self.short_name
 
+    def is_active(self):
+        return self.active and self.started and not self.finished
+
 
 class Participant(TimeStampedModel):
     name = models.CharField(max_length=80,

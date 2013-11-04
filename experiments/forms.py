@@ -77,3 +77,9 @@ class QuickExperiment(forms.Form):
                 else:
                     raise forms.ValidationError('"{}" is not properly formatted'.format(line))
         return items
+
+
+class BiddingForm(forms.Form):
+    ordering = forms.CharField(max_length=254,
+                               required=False,
+                               widget=forms.HiddenInput)

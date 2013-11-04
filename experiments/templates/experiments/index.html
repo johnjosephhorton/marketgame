@@ -1,3 +1,45 @@
 {% extends "base.html" %}
 
-{% block header %}{% endblock %}
+{% block title %}| Start{% endblock %}
+{% block header %}Before we begin{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ STATIC_URL }}/experiment.css">
+{% endblock %}
+
+{% block content %}
+<div id="instructions">
+  <p class="lead">Instructions</p>
+  <p>You are about to be shown the list of items to bid on. This list will be randomized so that each user is presented the items in a random order.</p>
+  <p><button id="goto-form" type="button" class="btn btn-primary">Yes, I understand</button></p>
+</div>
+<div id="experiment">
+  <div class="row">
+    <div class="col-md-8">
+      <p class="lead">Items</p>
+    </div>
+    <div class="col-md-4">
+      <p class="lead">Remaining Quota: <span class="badge quota" id="remaining-quota">2</span></p>
+    </div>
+  </div>
+  <form id="bidding-form" action="." method="POST">{% csrf_token %}
+    {{ form.ordering }}
+    <ol id="items">
+      <!-- <li><input id="" type="checkbox"> <label for="">Item-name <span class="badge">1.00</span></label></li> -->
+    {% for field in form.visible_fields %}
+      <li>{{ field }} <label for="{{ field.id_for_label }}">{{ field.label }}</label></li>
+    {% endfor %}
+    </ol>
+    <input class="btn btn-success pull-right" type="submit" value="Ok, I'm done bidding">
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  PUSHER_API_KEY = "{{ pusher_api_key }}";
+  EXPERIMENT_CHANNEL = "{{ experiment.short_name }}";
+</script>
+<script src="{{ STATIC_URL }}/pusher.min.js"></script>
+<script src="{{ STATIC_URL }}/experiment.js"></script>
+{% endblock %}

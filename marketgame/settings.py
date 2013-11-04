@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import urlparse
 import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -104,3 +105,10 @@ else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REDIS_URL = os.getenv('REDISCLOUD_URL', 'redis://localhost:6379')
+PUSHER_URL = os.getenv('PUSHER_URL', 'http://1c18ba76360c9da91d31:528e65c2c7303152f346@api.pusherapp.com/apps/58507')
+
+if PUSHER_URL:
+    _pusher_url = urlparse.urlparse(PUSHER_URL)
+    PUSHER_KEY = _pusher_url.username
+    PUSHER_SECRET = _pusher_url.password
+    PUSHER_APP = _pusher_url.path.split('/')[-1]

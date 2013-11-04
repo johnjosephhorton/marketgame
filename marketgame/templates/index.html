@@ -3,5 +3,12 @@
 {% block header %}Market game{% endblock %}
 
 {% block content %}
+{% if messages %}
+<p class="lead">Ok...</p>
+{% for message in messages %}
+<p class="alert {{ message.tags }}">{{ message }}</p>
+{% endfor %}
+{% else %}
 <p class="lead">If you have received an email, use the link provided to get started.</p>
+{% endif %}
 {% endblock %}

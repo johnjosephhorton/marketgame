@@ -1,0 +1,16 @@
+#experiment {
+    display: none;
+}
+
+.quota {
+    font-size: inherit !important;
+    background-color: #3276b1;
+}
+
+.quota-low {
+    background-color: #d2322d;
+}
+
+.bid {
+    background-color: #d2322d;
+}
