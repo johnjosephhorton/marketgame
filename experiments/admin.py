@@ -115,6 +115,21 @@ class ExperimentAdmin(admin.ModelAdmin):
                    'finished',
                    'active')
     filter_horizontal = ('items',)
+    actions = ['start_experiment', 'resend_emails']
+
+    def start_experiment(self, request, queryset):
+        if not queryset.filter(started=True).exists():
+            self.message_user(request, 'Starting selected experiment(s)...')
+        else:
+            self.message_user(request, 'You have selected experiment(s) that have already started', messages.ERROR)
+    start_experiment.short_description = 'Start selected experiments (will send emails to participants)'
+
+    def resend_emails(self, request, queryset):
+        if queryset.filter(started=True, active=True, finished=False).exists():
+            self.message_user(request, 'Resending emails to participants...')
+        else:
+            self.message_user(request, 'Selected experiment(s) must be active, started and not finished', messages.ERROR)
+    resend_emails.short_description = 'Resend emails to participants w/ incomplete sessions'
 
 
 class ParticipantAdmin(admin.ModelAdmin):
