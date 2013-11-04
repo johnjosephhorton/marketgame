@@ -20,7 +20,7 @@ from experiments.models import (Experiment,
                                 ChoiceSet,
                                 Winner)
 from experiments.forms import QuickExperiment
-from tasks import send_participants_emails
+from tasks import send_participants_emails, resend_participant_emails
 
 
 class MarketGameAdmin(AdminSite):
@@ -65,7 +65,7 @@ class MarketGameAdmin(AdminSite):
                 if form.cleaned_data['start_on_create']:
                     redis_conn = redis.from_url(settings.REDIS_URL)
                     q = Queue(connection=redis_conn)
-                    q.enqueue(send_participants_emails, experiment.short_name)
+                    q.enqueue(send_participants_emails, [experiment.pk])
                     messages.add_message(request,
                                          messages.SUCCESS,
                                          'Starting experiment: sending out emails...')
@@ -132,6 +132,10 @@ class ExperimentAdmin(admin.ModelAdmin):
 
     def start_experiment(self, request, queryset):
         if not queryset.filter(started=True).exists():
+            redis_conn = redis.from_url(settings.REDIS_URL)
+            q = Queue(connection=redis_conn)
+            q.enqueue(send_participants_emails, list(queryset.values_list('pk', flat=True)))
+
             self.message_user(request, 'Starting selected experiment(s)...')
         else:
             self.message_user(request, 'You have selected experiment(s) that have already started', messages.ERROR)
@@ -139,6 +143,10 @@ class ExperimentAdmin(admin.ModelAdmin):
 
     def resend_emails(self, request, queryset):
         if queryset.filter(started=True, active=True, finished=False).exists():
+            redis_conn = redis.from_url(settings.REDIS_URL)
+            q = Queue(connection=redis_conn)
+            q.enqueue(resend_participant_emails, list(queryset.values_list('pk', flat=True)))
+
             self.message_user(request, 'Resending emails to participants...')
         else:
             self.message_user(request, 'Selected experiment(s) must be active, started and not finished', messages.ERROR)
