@@ -55,7 +55,10 @@
 <div id="content-related">
     <div class="module" id="recent-actions-module">
         <h2>{% trans 'Quick Links' %}</h2>
-        <h3><a href="{% url 'admin:quick-experiment' %}">{% trans 'Create Quick Experiment' %}</a></h3>
+        <h3>Links</h3>
+        <ul class="actionlist">
+        <li><a href="{% url 'admin:quick-experiment' %}">{% trans 'Create Quick Experiment' %}</a></li>
+        </ul>
     </div>
     <div class="module" id="recent-actions-module">
         <h2>{% trans 'Recent Actions' %}</h2>
