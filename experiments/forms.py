@@ -13,7 +13,15 @@ class QuickExperiment(forms.Form):
     short_name = forms.CharField(max_length=40,
                                  required=True,
                                  widget=widgets.AdminTextInputWidget,
-                                 help_text='Short Name for experiment, which will be used in URL.')
+                                 help_text='Short name for experiment, which will be used in URL.')
+    contact_name = forms.CharField(max_length=80,
+                                   required=True,
+                                   widget=widgets.AdminTextInputWidget,
+                                   help_text='Contact name to be shown to participants.')
+    contact_email = forms.CharField(max_length=254,
+                                    required=True,
+                                    widget=widgets.AdminEmailInputWidget,
+                                    help_text='Contact email to be shown to participants.')
     show_bid_counts = forms.BooleanField(initial=False, required=False,
                                          help_text='Show bid counts to participants.')
     start_on_create = forms.BooleanField(initial=False, required=False,
