@@ -10,11 +10,20 @@ class Experiment(TimeStampedModel):
                                   unique=True,
                                   db_index=True)
     show_bid_counts = models.BooleanField(default=False)
-    disabled = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
     deadline = models.DateTimeField()
     participants = models.ManyToManyField('Participant',
                                           through='Session',
                                           related_name='experiments')
+    items = models.ManyToManyField('Item', related_name='experiments')
+
+    contact_name = models.CharField(max_length=80)
+    contact_email = models.EmailField(max_length=254)
+
+    started = models.BooleanField(default=False, editable=False)
+    started_time = models.DateTimeField(editable=False)
+    finished = models.BooleanField(default=False, editable=False)
+    finished_time = models.DateTimeField(editable=False)
 
     def __unicode__(self):
         return self.short_name
