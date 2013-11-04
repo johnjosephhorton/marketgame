@@ -1,11 +1,15 @@
+import redis
+from rq import Connection, Queue
 from django.core import urlresolvers
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.templatetags.admin_static import static
+from django.contrib import messages
 from django.template.response import TemplateResponse
 from django.shortcuts import redirect
 from django import forms
+from django.conf import settings
 
 from experiments.models import (Experiment,
                                 Participant,
@@ -15,6 +19,8 @@ from experiments.models import (Experiment,
                                 ChoiceSet,
                                 Winner)
 from experiments.forms import QuickExperiment
+from tasks import send_participants_emails
+
 
 class MarketGameAdmin(AdminSite):
     def index(self, *args, **kwargs):
@@ -54,6 +60,14 @@ class MarketGameAdmin(AdminSite):
                     experiment.items.add(obj)
 
                 experiment.save()
+
+                if form.cleaned_data['start_on_create']:
+                    redis_conn = redis.from_url(settings.REDIS_URL)
+                    q = Queue(connection=redis_conn)
+                    q.enqueue(send_participants_emails, experiment.short_name)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'Starting experiment: sending out emails...')
                 return redirect(urlresolvers.reverse('admin:experiments_experiment_change', args=(experiment.pk,)))
         else:
             form = QuickExperiment()

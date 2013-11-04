@@ -102,3 +102,5 @@ if not USE_EMAIL_CONSOLE:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+REDIS_URL = os.getenv('REDISCLOUD_URL', 'redis://localhost:6379')
