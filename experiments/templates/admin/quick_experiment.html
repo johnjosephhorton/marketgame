@@ -23,7 +23,7 @@
 
 <fieldset class="module aligned">
     <h2>Quick Experiment</h2>
-    <div class="description">Use this form to quickly create experiments. Fields <strong>Participants</strong> and <strong>Items</strong> containing list of items or participants  will use existing records, if available.</div>
+    <div class="description">Use this form to quickly create experiments. <strong>Participants</strong> and <strong>Items</strong> lists will use existing records, if available.</div>
     {% for field in form %}
     <div class="form-row {% if field.name %} field-{{ field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.is_hidden %} hidden{% endif %}">
       <div class="{% if field.field.widget|klass == "CheckboxInput" %}checkbox-row{% endif %}">
