@@ -1,8 +1,10 @@
+from django.core import urlresolvers
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.templatetags.admin_static import static
 from django.template.response import TemplateResponse
+from django.shortcuts import redirect
 from django import forms
 
 from experiments.models import (Experiment,
@@ -31,7 +33,28 @@ class MarketGameAdmin(AdminSite):
         if request.method == 'POST':
             form = QuickExperiment(request.POST)
             if form.is_valid():
-                short_name = form.cleaned_data['short_name']
+                experiment = Experiment.objects.create(
+                    short_name=form.cleaned_data['short_name'],
+                    show_bid_counts=form.cleaned_data['show_bid_counts'],
+                    contact_name=form.cleaned_data['contact_name'],
+                    contact_email=form.cleaned_data['contact_email'],
+                    deadline=form.cleaned_data['deadline'])
+
+                for name, email, quota in form.cleaned_data['participants']:
+                    obj, created = Participant.objects.get_or_create(name=name,
+                                                                     email=email)
+                    session = Session.objects.create(
+                        experiment=experiment,
+                        participant=obj,
+                        quota=quota)
+
+                for name, amount in form.cleaned_data['items']:
+                    obj, created = Item.objects.get_or_create(name=name,
+                                                              amount=amount)
+                    experiment.items.add(obj)
+
+                experiment.save()
+                return redirect(urlresolvers.reverse('admin:experiments_experiment_change', args=(experiment.pk,)))
         else:
             form = QuickExperiment()
 
