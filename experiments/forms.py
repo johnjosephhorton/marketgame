@@ -28,13 +28,13 @@ class QuickExperiment(forms.Form):
                                          help_text='Start experiment immediately.')
     deadline = forms.DateTimeField(widget=widgets.AdminSplitDateTime,
                                    help_text='Deadline for experiment active status.')
-    participants = forms.CharField(widget=widgets.AdminTextareaWidget,
-                                   label='Participants (w/ quota)',
-                                   help_text='Line-separated particpant list, using format:\nname, email, quota')
     items = forms.CharField(widget=widgets.AdminTextareaWidget,
                             label='Items (w/ amount)',
                             help_text='Line-separated item list, using format:\nitem-name, amount')
 
+    participants = forms.CharField(widget=widgets.AdminTextareaWidget,
+                                   label='Participants (w/ quota)',
+                                   help_text='Line-separated particpant list, using format:\nname, email, quota')
 
     def clean_short_name(self):
         short_name = self.cleaned_data['short_name']
@@ -44,15 +44,21 @@ class QuickExperiment(forms.Form):
 
     def clean_participants(self):
         participants = []
+        item_count = len(self.cleaned_data['items'])
         for line in self.cleaned_data['participants'].split('\n'):
             # ignore empty lines
             if line:
                 if PARTICIPANTS_REGEX.match(line):
-                    name, email, quota = [w.strip() for w in line.split(',')]
+                    name, email, quota_s = [w.strip() for w in line.split(',')]
                     try:
-                        participants.append((name,email, int(quota, 10)))
+                        quota = int(quota_s, 10)
                     except ValueError, e:
-                        raise forms.ValidationError('"{}" please use a valid integer'.format(line))
+                        raise forms.ValidationError('"{}" please use a valid integer.'.format(line))
+
+                    if quota < item_count:
+                        participants.append((name,email, quota))
+                    else:
+                        raise forms.ValidationError('"{}" quota must be less than number of items.'.format(line))
                 else:
                     raise forms.ValidationError('"{}" is not properly formatted.'.format(line))
         return participants
