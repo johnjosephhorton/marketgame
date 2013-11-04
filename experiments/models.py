@@ -58,9 +58,9 @@ class Session(TimeStampedModel):
     def __unicode__(self):
         return 'Session {}'.format(self.id)
 
-    def save(*args, **kwargs):
+    def save(self, *args, **kwargs):
         if self.pk is None:
-            self.access_token = uuid.uuid1()
+            self.access_token = uuid.uuid1().hex
         return super(Session, self).save(*args, **kwargs)
 
 
