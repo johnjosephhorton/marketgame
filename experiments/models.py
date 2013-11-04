@@ -21,9 +21,9 @@ class Experiment(TimeStampedModel):
     contact_email = models.EmailField(max_length=254)
 
     started = models.BooleanField(default=False, editable=False)
-    started_time = models.DateTimeField(editable=False)
+    started_time = models.DateTimeField(null=True, blank=True, editable=False)
     finished = models.BooleanField(default=False, editable=False)
-    finished_time = models.DateTimeField(editable=False)
+    finished_time = models.DateTimeField(null=True, blank=True, editable=False)
 
     def __unicode__(self):
         return self.short_name
