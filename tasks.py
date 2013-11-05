@@ -59,7 +59,7 @@ def send_participants_emails(experiment_ids):
         else:
             log.error('experiment {} already started/finished'.format(experiment.short_name))
 
-    send_mass_mail(messages, fail_silently=False)
+    send_mass_mail(messages, fail_silently=True)
 
 
 def resend_participant_emails(experiment_ids):
@@ -79,7 +79,7 @@ def resend_participant_emails(experiment_ids):
         else:
             log.error('experiment {} is not active or finished'.format(experiment.short_name))
 
-    send_mass_mail(messages, fail_silently=False)
+    send_mass_mail(messages, fail_silently=True)
 
 
 def pick_winners(experiment_ids):
