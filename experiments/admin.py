@@ -90,21 +90,8 @@ class MarketGameAdmin(AdminSite):
 marketadmin = MarketGameAdmin()
 
 
-class SessionForm(forms.ModelForm):
-    class Meta:
-        model = Session
-
-    def clean(self):
-        experiment = self.cleaned_data['experiment']
-        session_quota = self.cleaned_data['quota']
-        if session_quota >= experiment.items.count():
-            raise forms.ValidationError('Session quota must be less than item count', code='invalid')
-
-        return self.cleaned_data
-
 class SessionInline(admin.TabularInline):
     model = Session
-    form = SessionForm
     extra = 1
     fields = ('participant',
               'quota')
