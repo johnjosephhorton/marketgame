@@ -46,7 +46,8 @@
   var MARKETGAME_CONFIG = {
     pusher_api_key: '{{ pusher_api_key }}',
     experiment_channel: '{{ experiment.short_name }}',
-    access_token: '{{ access_token }}'
+    access_token: '{{ access_token }}',
+    session_id: '{{ session.id }}'
   };
 </script>
 <script src="{{ STATIC_URL }}/pusher.min.js"></script>

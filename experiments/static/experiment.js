@@ -92,7 +92,8 @@
                 $item.data('unsaved-bids', unsaved_bids);
             } else {
                 var item_name = $item.prop('name'),
-                    event_data = {'event': 'item-bid',
+                    event_data = {'from': config['session_id'],
+                                  'event': 'item-bid',
                                   'item': item_name,
                                   'bid': bid},
                     post_data = {'data': JSON.stringify(event_data)};
@@ -127,9 +128,9 @@
         channel = pusher.subscribe(config['experiment_channel']);
 
         channel.bind('item-bid', function(data) {
-            console.log('item-bid event');
-            console.log(data);
-            bid_item($('#id_'+data['item']), data['bid'], false);
+            if(data['from'] !== config['session_id']) {
+                bid_item($('#id_'+data['item']), data['bid'], false);
+            }
         });
 
         $('#items input').each(function(idx, elm) {
