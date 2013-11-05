@@ -2,6 +2,10 @@
     display: none;
 }
 
+#items {
+    position: relative;
+}
+
 .quota {
     font-size: inherit !important;
     background-color: #3276b1;

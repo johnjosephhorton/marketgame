@@ -85,7 +85,9 @@ def index(request, access_token=None):
         form.data = request.POST
         form.is_bound = True
         if form.is_valid():
-            choice_set, created = ChoiceSet.objects.get_or_create(session=session)
+            choice_set, created = ChoiceSet.objects.get_or_create(
+                session=session,
+                order=[w.strip() for w in form.cleaned_data['ordering'].split(',')])
             available_items = experiment.items
             for field in form.visible_fields():
                 bid = form.cleaned_data[field.name]

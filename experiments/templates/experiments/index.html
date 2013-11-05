@@ -21,7 +21,7 @@
 <div id="experiment">
   <div class="row">
     <div class="col-md-8">
-      <p class="lead">Items</p>
+      <p id="items-lead" class="lead">Items</p>
     </div>
     <div class="col-md-4">
       <p class="lead">Remaining Quota: <span class="badge quota" id="remaining-quota">2</span></p>
@@ -35,7 +35,7 @@
       <li>{{ field }} <label for="{{ field.id_for_label }}">{{ field.label }}</label></li>
     {% endfor %}
     </ol>
-    <input class="btn btn-success pull-right" type="submit" value="Ok, I'm done bidding">
+    <input id="submit-bids" class="btn btn-success pull-right" type="submit" value="Ok, I'm done bidding" disabled>
   </form>
 </div>
 {% endif %}

@@ -86,7 +86,7 @@ class Item(TimeStampedModel):
 
 class ChoiceSet(TimeStampedModel):
     session = models.OneToOneField(Session, related_name='choice_set')
-    order = JSONField(default='{}')
+    order = JSONField(default='[]')
 
     def __unicode__(self):
         return 'ChoiceSet {}'.format(self.id)

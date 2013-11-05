@@ -4,6 +4,46 @@
         pusher_connected = false,
         show_bid_counts = false;
 
+    $.fn.randomize = function(childElem) {
+        return this.each(function() {
+            var $this = $(this),
+                elems = $this.children(childElem),
+                itemHeight = $(elems[0]).height();
+
+            elems.css('position', 'relative');
+            elems.sort(function() { return Math.random() > 0.4 ? -1 : 1;});
+            elems.sort(function() { return Math.random() > 0.5 ? -1 : 1;});
+
+            // add new ordering to <<ordering>> form field
+            var ordering = elems.children('input')
+                    .map(function() {return $(this).prop('name');})
+                    .get().join();
+            $('#id_ordering').val(ordering);
+
+            elems.each(function(idx, elm) {
+                setTimeout(function() {
+                    var pos = $(elm).position().top,
+                        idxPos = idx * itemHeight,
+                        delta = idxPos - pos;
+
+                    $(elm).animate({top: delta}, 500);
+
+                    if(idx === (elems.length - 1)) {
+                        setTimeout(function() {
+                            $this.remove(childElem);
+                            elems.each(function(){
+                                $this.append(this);
+                            });
+                            elems.css('position', 'static');
+                            $('#submit-bids').removeAttr('disabled');
+                            $('#items-lead').html('Items');
+                        }, 500);
+                    }
+                }, idx * 500);
+            });
+        });
+    };
+
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -73,10 +113,11 @@
         if(show_bid_counts) {
             $('#items input').each(function(idx, elm) {
                 var saved_bids = $(this).data('saved-bids'),
-                    unsaved_bids = $(this).data('unsaved-bids');
+                    unsaved_bids = $(this).data('unsaved-bids'),
+                    total = saved_bids + unsaved_bids,
+                    bids_id = '#'+$(this).prop('id')+'_bids';
 
-                $('#'+$(this).prop('id')+'_bids').html('Other bids: '
-                                                       + saved_bids + unsaved_bids);
+                $(bids_id).html('Other bids: '+ total);
             });
         }
     }
@@ -126,6 +167,11 @@
             $('#instructions').hide();
             $('div.page-header h1').html('Start bidding');
             $('#experiment').show();
+
+            setTimeout(function() {
+                $('#items-lead').html('Items (randomizing)');
+                $('#items').randomize('li');
+            }, 500);
             ev.preventDefault();
         });
 
