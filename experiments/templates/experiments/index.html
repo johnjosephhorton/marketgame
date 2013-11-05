@@ -37,8 +37,11 @@
 
 {% block scripts %}
 <script type="text/javascript">
-  PUSHER_API_KEY = "{{ pusher_api_key }}";
-  EXPERIMENT_CHANNEL = "{{ experiment.short_name }}";
+  var MARKETGAME_CONFIG = {
+    pusher_api_key: '{{ pusher_api_key }}',
+    experiment_channel: '{{ experiment.short_name }}',
+    access_token: '{{ access_token }}'
+  };
 </script>
 <script src="{{ STATIC_URL }}/pusher.min.js"></script>
 <script src="{{ STATIC_URL }}/experiment.js"></script>

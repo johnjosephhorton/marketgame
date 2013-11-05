@@ -1,16 +1,42 @@
-(function($, pusher_api_key, experiment_channel){
+(function($, config){
     var pusher,
         channel,
         pusher_connected = false,
         show_bid_counts = false;
 
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = $.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    var csrftoken = getCookie('csrftoken');
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
     function bid_item($item, bid, self) {
         if(show_bid_counts) {
-            channel.trigger('item-bid', {
-                'item_id': $item.prop('id'),
-                'bid': bid
-            });
-
             if(self === false) {
                 var unsaved_bids = $item.data('unsaved-bids');
                 if(unsaved_bids === undefined) {
@@ -24,9 +50,22 @@
                 }
 
                 $item.data('unsaved-bids', unsaved_bids);
+            } else {
+                var item_name = $item.prop('name'),
+                    event_data = {'event': 'item-bid',
+                                  'item': item_name,
+                                  'bid': bid},
+                    post_data = {'data': JSON.stringify(event_data)};
+
+                $.post('/exp/event/' + config['access_token'], post_data)
+                    .done(function(data) {
+                        if(data.result === false) {
+                            console.log('something bad happened');
+                            console.log(data);
+                        }
+                    });
             }
         }
-
         update_bid_counts();
     }
 
@@ -42,40 +81,13 @@
     }
 
     $(document).ready(function() {
-        pusher = new Pusher(pusher_api_key);
-        channel = pusher.subscribe(experiment_channel);
+        pusher = new Pusher(config['pusher_api_key']);
+        channel = pusher.subscribe(config['experiment_channel']);
 
         channel.bind('item-bid', function(data) {
             console.log('item-bid event');
             console.log(data);
-            bid_item($(data.item_id), data.bid, false);
-        });
-
-        channel.bind('item-bid-tally', function(data) {
-            console.log('item-bid-tally event');
-            console.log(data);
-            $.each(data.items, function(idx, item) {
-                $(item.id).data('unsaved-bids', item.unsaved_bids);
-            });
-        });
-
-        channel.bind('new-participant', function(data) {
-            console.log('new-participant event');
-            console.log(data);
-            // tally unsaved bids
-            var items = $('#items input').map(function() {
-                return {
-                    id: $(this).prop('id'),
-                    unsaved_bids: $(this).data('unsaved-bids')
-                };
-            });
-            channel.trigger('item-bid-tally', {items: items});
-        });
-
-        channel.bind('pusher:subscription_succeeded', function() {
-            console.log('subscription succeeded');
-            pusher_connected = true;
-            channel.trigger('new-participant', {});
+            bid_item($(data['item']), data['bid'], false);
         });
 
         $('#items input').each(function(idx, elm) {
@@ -91,6 +103,18 @@
                 $this.parent().append(' <span id="' + $this.prop('id')
                                       + '_bids' + '"class="badge bid">'
                                       + 'Other Bids: ' + saved_bids + '</span>');
+            }
+
+            if(show_bid_counts) {
+                var event_data = {'event': 'new-participant'},
+                    post_data = {'data': JSON.stringify(event_data)};
+                $.post('/exp/event/' + config['access_token'], post_data)
+                .done(function(data) {
+                    $.each(data.result, function(item, current_bids) {
+                        $('#id_'+item+'_bids').data('unsaved_bids', current_bids);
+                    });
+                    update_bid_counts();
+                });
             }
         });
 
@@ -132,4 +156,4 @@
             }
         });
     });
-})(jQuery, PUSHER_API_KEY, EXPERIMENT_CHANNEL);
+})(jQuery, MARKETGAME_CONFIG);
