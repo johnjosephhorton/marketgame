@@ -13,6 +13,6 @@ logging.info('rqworker connecting to {}'.format(settings.REDIS_URL))
 conn = redis.from_url(settings.REDIS_URL)
 
 if __name__ == '__main__':
-    with Connection(redis.Redis()):
+    with Connection(conn):
         worker = Worker(map(Queue, listen))
         worker.work()
