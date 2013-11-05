@@ -1,6 +1,7 @@
 import pusher
-import redis
 import json
+import redis
+from rq import Connection, Queue
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
@@ -15,6 +16,7 @@ from experiments.models import (Experiment,
                                 Item,
                                 Session)
 from experiments.forms import BiddingForm
+from tasks import pick_winners
 
 
 def get_bidding_form(experiment):
@@ -23,8 +25,15 @@ def get_bidding_form(experiment):
     for item in experiment.items.all():
         data_attrs = {
             'data-amount': str(item.amount),
-            'data-saved-bids': '1',
         }
+
+        if experiment.show_bid_counts:
+            # certainly inefficient
+            saved_bids = experiment.sessions.filter(
+                choice_set__choices__item=item,
+                choice_set__choices__bid=True).count()
+            data_attrs['data-saved-bids'] = saved_bids
+
         form.fields[item.name] = forms.BooleanField(required=False,
                                                     widget=forms.CheckboxInput(attrs=data_attrs))
     return form
@@ -34,6 +43,8 @@ def index(request, access_token=None):
     if access_token is None:
         return redirect('home')
 
+    r = redis.from_url(settings.REDIS_URL)
+    q = Queue(connection=r)
     session = get_object_or_404(Session, access_token=access_token)
     experiment = session.experiment
 
@@ -41,10 +52,22 @@ def index(request, access_token=None):
     if now() >= experiment.deadline and not experiment.finished:
         experiment.finished = True
         experiment.finished_time = now()
-        # queue pick-winners background job
+        q.enqueue(pick_winners, [experiment.pk])
         messages.add_message(request,
                              messages.ERROR,
                              'Your session has already expired.', extra_tags='alert-danger')
+        return redirect('home')
+
+    if session.has_completed:
+        messages.add_message(request,
+                             messages.ERROR,
+                             'You have already completed bidding.', extra_tags='alert-danger')
+        return redirect('home')
+
+    if not experiment.is_active():
+        messages.add_message(request,
+                             messages.ERROR,
+                             'Bidding is closed.', extra_tags='alert-danger')
         return redirect('home')
 
     form = get_bidding_form(experiment)
@@ -59,17 +82,35 @@ def index(request, access_token=None):
 
     if request.method == 'POST':
         # process submitted bids
-        pass
-    else:
-        # check if session is valid and experiment active
-        if experiment.is_active and not session.has_completed:
-            return render(request, 'experiments/index.html', context)
+        form.data = request.POST
+        form.is_bound = True
+        if form.is_valid():
+            choice_set, created = ChoiceSet.objects.get_or_create(session=session)
+            available_items = experiment.items
+            for field in form.visible_fields():
+                bid = form.cleaned_data[field.name]
+                choice_set.choices.create(item=available_items.get(name=field.name), bid=bid)
+                # decrement unsaved bid because bid has been saved
+                if bid:
+                    r.hincrby(experiment.short_name, field.name, -1)
+            session.has_completed = True
+            session.save()
+
+            # check if all sessions completed
+            if not experiment.sessions.filter(has_completed=False).exists():
+                experiment.finished = True
+                experiment.finished_time = now()
+                experiment.save()
+                q.enqueue(pick_winners, [experiment.pk])
+
+            return render(request, 'experiments/complete.html', context)
         else:
-            # redirect
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Your session has already expired.', extra_tags='alert-danger')
-            redirect('home')
+                                 'Form submission error.', extra_tags='alert-danger')
+            return render(request, 'experiments/index.html', context)
+    else:
+        return render(request, 'experiments/index.html', context)
 
 
 def event(request, access_token):

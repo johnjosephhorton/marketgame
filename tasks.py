@@ -48,6 +48,8 @@ def send_participants_emails(experiment_ids):
         if not experiment.started and not experiment.finished:
             for session in experiment.sessions.all():
                 messages.append(get_email_message(session))
+                session.has_emailed = True
+                session.save()
             experiment.started = True
             experiment.active = True
             experiment.started_time = now()
@@ -68,6 +70,8 @@ def resend_participant_emails(experiment_ids):
             for session in experiment.sessions.all():
                 if not session.has_completed:
                     messages.append(get_email_message(session))
+                    session.has_emailed = True
+                    session.save()
                     log.info('sending email to participant {}'.format(session.participant.name))
                 else:
                     log.error('participant {} has already completed experiment'.format(session.participant.name))
@@ -75,3 +79,7 @@ def resend_participant_emails(experiment_ids):
             log.error('experiment {} is not active or finished'.format(experiment.short_name))
 
     send_mass_mail(messages, fail_silently=False)
+
+
+def pick_winners(experiment_ids):
+    log.info('picking experiment winner')

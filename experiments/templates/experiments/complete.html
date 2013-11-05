@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}| Finished{% endblock %}
+{% block header %}Done!{% endblock %}
+
+{% block content %}
+<div id="instructions">
+  <p class="lead">Thank you</p>
+  <p>You have completed bidding! We will be in touch soon!</p>
+  <p>For any questions, please send us an email:</p>
+    <address>
+      <strong>Email</strong>
+      <a href="mailto:{{ experiment.contact_email }}">{{ experiment.contact_name }} - {{ experiment.contact_email }}</a>
+    </address>
+</div>
+{% endblock %}

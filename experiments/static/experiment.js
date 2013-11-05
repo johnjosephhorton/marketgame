@@ -75,7 +75,8 @@
                 var saved_bids = $(this).data('saved-bids'),
                     unsaved_bids = $(this).data('unsaved-bids');
 
-                $($(this).prop('id') + '_bids').text(saved_bids + unsaved_bids);
+                $('#'+$(this).prop('id')+'_bids').html('Other bids: '
+                                                       + saved_bids + unsaved_bids);
             });
         }
     }
@@ -87,7 +88,7 @@
         channel.bind('item-bid', function(data) {
             console.log('item-bid event');
             console.log(data);
-            bid_item($(data['item']), data['bid'], false);
+            bid_item($('#id_'+data['item']), data['bid'], false);
         });
 
         $('#items input').each(function(idx, elm) {
@@ -98,7 +99,7 @@
             $label.html($label.html() + badgeLabel);
 
             var saved_bids = $this.data('saved-bids');
-            if(saved_bids) {
+            if(saved_bids !== undefined) {
                 if(!show_bid_counts) show_bid_counts = true;
                 $this.parent().append(' <span id="' + $this.prop('id')
                                       + '_bids' + '"class="badge bid">'
@@ -108,13 +109,16 @@
             if(show_bid_counts) {
                 var event_data = {'event': 'new-participant'},
                     post_data = {'data': JSON.stringify(event_data)};
-                $.post('/exp/event/' + config['access_token'], post_data)
-                .done(function(data) {
-                    $.each(data.result, function(item, current_bids) {
-                        $('#id_'+item+'_bids').data('unsaved_bids', current_bids);
+                $.post('/exp/event/' + config['access_token'],
+                       post_data)
+                    .always(function(data) {
+                        var result = JSON.parse(data.responseText);
+                        $.each(result['result'], function(item, current_bids) {
+                            $('#id_'+item).data('unsaved-bids',
+                                                parseInt(current_bids,10));
+                        });
+                        update_bid_counts();
                     });
-                    update_bid_counts();
-                });
             }
         });
 

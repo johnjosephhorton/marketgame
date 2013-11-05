@@ -8,6 +8,11 @@
 {% endblock %}
 
 {% block content %}
+{% if messages %}
+{% for message in messages %}
+<p class="alert {{ message.tags }}">{{ message }}</p>
+{% endfor %}
+{% else %}
 <div id="instructions">
   <p class="lead">Instructions</p>
   <p>You are about to be shown the list of items to bid on. This list will be randomized so that each user is presented the items in a random order.</p>
@@ -33,6 +38,7 @@
     <input class="btn btn-success pull-right" type="submit" value="Ok, I'm done bidding">
   </form>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
