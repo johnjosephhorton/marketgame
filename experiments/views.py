@@ -22,7 +22,8 @@ from tasks import pick_winners
 def get_bidding_form(experiment):
     form = BiddingForm()
 
-    for item in experiment.items.all():
+    items = experiment.items.all()
+    for item in items:
         data_attrs = {
             'data-amount': str(item.amount),
         }

@@ -1,9 +1,10 @@
+import random
 import logging
 from django.core.mail import send_mass_mail
 from django.utils.timezone import now
 from django.utils.formats import date_format
 
-from experiments.models import Experiment
+from experiments.models import Experiment, Winner
 
 
 log = logging.getLogger(__name__)
@@ -82,4 +83,16 @@ def resend_participant_emails(experiment_ids):
 
 
 def pick_winners(experiment_ids):
-    log.info('picking experiment winner')
+    experiments = Experiment.objects.in_bulk(experiment_ids).values()
+    for e in experiments:
+        items = e.items.all()
+        random.seed()
+        for item in items:
+            selection = e.sessions.filter(choice_set__choices__item=item, choice_set__choices__bid=True)
+            if len(selection) > 0:
+                winner = random.choice(selection)
+                Winner.objects.create(session=winner,
+                                      experiment=e,
+                                      participant=winner.participant,
+                                      item=item)
+                log.info('winner {} selected for item {}'.format(winner.participant, item.name))
