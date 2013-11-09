@@ -164,10 +164,9 @@ def event(request, access_token):
             unsaved_bids[item] = 1 if bid else 0
             r.hmset(exp_key, unsaved_bids)
 
-        p[exp_key].trigger('item-bid', data)
-
         session.events.create(event_type='item_bid' if bid else 'item_unbid',
                               data=data)
+        p[exp_key].trigger('item-bid', data)
         return HttpResponse(json.dumps({'result': True}),
                             content_type='application/javascript')
 
