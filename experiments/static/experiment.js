@@ -147,22 +147,23 @@
                                       + '_bids' + '"class="badge bid">'
                                       + 'Other Bids: ' + saved_bids + '</span>');
             }
-
-            if(show_bid_counts) {
-                var event_data = {'event': 'new-participant'},
-                    post_data = {'data': JSON.stringify(event_data)};
-                $.post('/exp/event/' + config['access_token'],
-                       post_data)
-                    .always(function(data) {
-                        var result = JSON.parse(data.responseText);
-                        $.each(result['result'], function(item, current_bids) {
-                            $('#id_'+item).data('unsaved-bids',
-                                                parseInt(current_bids,10));
-                        });
-                        update_bid_counts();
-                    });
-            }
         });
+
+
+        if(show_bid_counts) {
+            var event_data = {'event': 'new-participant'},
+                post_data = {'data': JSON.stringify(event_data)};
+            $.post('/exp/event/' + config['access_token'],
+                   post_data)
+                .always(function(data) {
+                    var result = JSON.parse(data.responseText);
+                    $.each(result['result'], function(item, current_bids) {
+                        $('#id_'+item).data('unsaved-bids',
+                                            parseInt(current_bids,10));
+                    });
+                    update_bid_counts();
+                });
+        }
 
         $('#goto-form').click(function(ev) {
             $('#instructions').hide();
