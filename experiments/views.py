@@ -11,6 +11,7 @@ from django.contrib import messages
 from django import forms
 
 from experiments.models import (Experiment,
+                                Event,
                                 ChoiceSet,
                                 Choice,
                                 Item,
@@ -99,6 +100,7 @@ def index(request, access_token=None):
             session.has_completed = True
             session.save()
 
+            session.events.create(event_type='exp_finished')
             # check if all sessions completed
             if not experiment.sessions.filter(has_completed=False).exists():
                 experiment.finished = True
@@ -146,6 +148,7 @@ def event(request, access_token):
     data = json.loads(request.POST['data'])
     event = data['event']
     if event == 'new-participant':
+        session.events.create(event_type='exp_started', data=data)
         return HttpResponse(json.dumps({'result': get_unsaved_bids(experiment, exp_key)}),
                             content_type='application/javascript')
     elif event == 'item-bid':
@@ -162,9 +165,10 @@ def event(request, access_token):
             r.hmset(exp_key, unsaved_bids)
 
         p[exp_key].trigger('item-bid', data)
+
+        session.events.create(event_type='item_bid' if bid else 'item_unbid',
+                              data=data)
         return HttpResponse(json.dumps({'result': True}),
                             content_type='application/javascript')
-    else:
-        return HttpResponseBadRequest()
 
     return HttpResponseBadRequest()
