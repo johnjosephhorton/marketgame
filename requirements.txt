@@ -1,4 +1,4 @@
--e git+https://github.com/django/django.git@9c982053f4d9c9696214d7c20ab32204d27e4a94#egg=Django-dev
+Django==1.6
 dj-database-url==0.2.2
 django-extensions==1.2.5
 psycopg2==2.5.1
