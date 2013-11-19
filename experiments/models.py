@@ -69,10 +69,10 @@ class Session(TimeStampedModel):
 
 class Event(TimeStampedModel):
     EVENT_TYPE_CHOICES = (
-        ('exp_started', 'experiment_started'),
-        ('exp_finished', 'experiment_finished'),
-        ('item_bid', 'item_bid'),
-        ('item_unbid', 'item_unbid')
+        ('exp_started', 'Experiment started'),
+        ('exp_finished', 'Experiment finished'),
+        ('item_bid', 'Item bid'),
+        ('item_unbid', 'Item unbid')
     )
     session = models.ForeignKey(Session, related_name='events')
     event_type = models.CharField(max_length=80, choices=EVENT_TYPE_CHOICES)

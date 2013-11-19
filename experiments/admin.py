@@ -11,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.shortcuts import redirect
 from django import forms
 from django.conf import settings
+from django.utils.html import format_html
 
 from experiments.models import (Experiment,
                                 Participant,
@@ -156,23 +157,51 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 
 class SessionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('participant',
+                    'access_url',
+                    'experiment',
+                    'quota',
+                    'has_emailed',
+                    'has_completed')
+
+    def access_url(self, obj):
+        return format_html('<a href="{}" target="_blank">{}</a>',
+                           '/exp/{}'.format(obj.access_token),
+                           obj.access_token)
+    access_url.short_description = 'Access Token'
+    access_url.allow_tags = True
 
 
 class EventAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('event_type', 'participant', 'data', 'created')
 
+    def participant(self, obj):
+        return obj.session.participant
+
+    def event_type_display(self, obj):
+        return obj
 
 class ItemAdmin(admin.ModelAdmin):
     pass
 
 
 class ChoiceSetAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('participant', 'bid_items', 'item_order')
+
+    def participant(self, obj):
+        return obj.session.participant
+
+    def item_order(self, obj):
+        return ', '.join(obj.order)
+
+    def bid_items(self, obj):
+        return ', '.join(obj.choices.filter(bid=True).values_list('item__name', flat=True))
 
 
 class WinnerAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('participant',
+                    'item',
+                    'experiment')
 
 
 marketadmin.register(Group, GroupAdmin)
