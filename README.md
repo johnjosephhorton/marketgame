@@ -133,6 +133,33 @@ heroku ps:stop web.1
 heroku ps:scale web=0
 ```
 
+Heroku Deployment Config
+------------------------
+
+This web application requires several Heroku addons, which are the
+following:
+* [Heroku Postgres](https://addons.heroku.com/heroku-postgresql) - Database
+* [Redis Cloud](https://addons.heroku.com/rediscloud) - Background Queues/Tasks
+* [Mandrill](https://addons.heroku.com/mandrill) - Email Notifications
+* [Pusher](https://addons.heroku.com/pusher) - Realtime Item Bid Events
+
+Adding these addons can be accomplished via the web interface or
+``heroko-cli``.
+
+```bash
+heroku addons:add heroku-postgresql:dev
+heroku addons:add mandrill:starter
+heroku addons:add pusher:sandbox
+heroku addons:add rediscloud:20
+```
+
+The ``DJANGO_SETTINGS_MODULE`` environment variable must be set in
+order to run the background redis worker.
+
+```bash
+heroku config:set DJANGO_SETTINGS_MODULE=marketgame.settings
+```
+
 [1]: https://www.heroku.com
 [2]: https://devcenter.heroku.com/articles/quickstart
 [3]: http://brew.sh
