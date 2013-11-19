@@ -50,10 +50,12 @@ def index(request, access_token=None):
     session = get_object_or_404(Session, access_token=access_token)
     experiment = session.experiment
 
+    import ipdb;ipdb.set_trace()
     # deadline check
     if now() >= experiment.deadline and not experiment.finished:
         experiment.finished = True
         experiment.finished_time = now()
+        experiment.save()
         q.enqueue(pick_winners, [experiment.pk])
         messages.add_message(request,
                              messages.ERROR,
