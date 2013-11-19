@@ -50,7 +50,6 @@ def index(request, access_token=None):
     session = get_object_or_404(Session, access_token=access_token)
     experiment = session.experiment
 
-    import ipdb;ipdb.set_trace()
     # deadline check
     if now() >= experiment.deadline and not experiment.finished:
         experiment.finished = True
