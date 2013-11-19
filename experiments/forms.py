@@ -83,3 +83,15 @@ class BiddingForm(forms.Form):
     ordering = forms.CharField(max_length=254,
                                required=False,
                                widget=forms.HiddenInput)
+    quota = forms.IntegerField(required=True,
+                               widget=forms.HiddenInput)
+
+    def clean(self):
+        cleaned_data = super(BiddingForm, self).clean()
+        quota = cleaned_data['quota']
+        num_bids = sum(1 for item in cleaned_data.items() if val is True)
+
+        if num_bids > quota:
+            raise ValidationError('quota limit exceeded')
+
+        return cleaned_data

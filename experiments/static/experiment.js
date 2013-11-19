@@ -191,6 +191,11 @@
                 $quota = $('#remaining-quota'),
                 quota = parseInt($quota.text(), 10);
 
+            if(quota <= 0) {
+                alert('You have used all your quota!');
+                return false;
+            }
+
             if($target.prop('checked')) {
                 quota = quota - 1;
                 $quota.text(quota);
@@ -206,6 +211,8 @@
             } else {
                 $quota.removeClass('quota-low');
             }
+
+            return true;
         });
     });
 })(jQuery, MARKETGAME_CONFIG);

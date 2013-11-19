@@ -29,8 +29,8 @@
   </div>
   <form id="bidding-form" action="." method="POST">{% csrf_token %}
     {{ form.ordering }}
+    {{ form.quota }}
     <ol id="items">
-      <!-- <li><input id="" type="checkbox"> <label for="">Item-name <span class="badge">1.00</span></label></li> -->
     {% for field in form.visible_fields %}
       <li>{{ field }} <label for="{{ field.id_for_label }}">{{ field.label }}</label></li>
     {% endfor %}

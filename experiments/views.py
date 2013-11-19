@@ -116,6 +116,7 @@ def index(request, access_token=None):
                                  'Form submission error.', extra_tags='alert-danger')
             return render(request, 'experiments/index.html', context)
     else:
+        form.fields['quota'].initial = session.quota
         return render(request, 'experiments/index.html', context)
 
 
