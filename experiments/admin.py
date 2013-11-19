@@ -20,7 +20,7 @@ from experiments.models import (Experiment,
                                 ChoiceSet,
                                 Winner)
 from experiments.forms import QuickExperiment
-from tasks import send_participants_emails, resend_participant_emails
+from tasks import send_participants_emails, resend_participant_emails, pick_winners
 
 
 class MarketGameAdmin(AdminSite):
@@ -115,7 +115,7 @@ class ExperimentAdmin(admin.ModelAdmin):
                    'finished',
                    'active')
     filter_horizontal = ('items',)
-    actions = ['start_experiment', 'resend_emails']
+    actions = ['start_experiment', 'resend_emails', 'pick_winners']
 
     def start_experiment(self, request, queryset):
         if not queryset.filter(started=True).exists():
@@ -138,6 +138,17 @@ class ExperimentAdmin(admin.ModelAdmin):
         else:
             self.message_user(request, 'Selected experiment(s) must be active, started and not finished', messages.ERROR)
     resend_emails.short_description = 'Resend emails to participants w/ incomplete sessions'
+
+    def pick_winners(self, request, queryset):
+        if queryset.filter(started=True, finished=False).exists():
+            redis_conn = redis.from_url(settings.REDIS_URL)
+            q = Queue(connection=redis_conn)
+            q.enqueue(pick_winners, list(queryset.values_list('pk', flat=True)))
+            queryset.update(finished=True)
+            self.message_user(request, 'Picking winners for selected experiment(s)...')
+        else:
+            self.message_user(request, 'The selected experiment(s) is finished or not started', messages.ERROR)
+    pick_winners.short_description = 'Pick winners and finish experiment'
 
 
 class ParticipantAdmin(admin.ModelAdmin):
